@@ -1,3 +1,8 @@
-pandas
-kafka-python
-pytest
+joblib==1.3.2
+kafka-python==2.0.2
+numpy==1.26.4
+pandas==2.1.4
+plotly==5.18.0
+PyYAML==6.0.2
+scikit-learn==1.3.2
+streamlit==1.28.2

@@ -1,38 +1,72 @@
-# COMP7707 – Real-time IoT Anomaly Detection
+# COMP7707 IoT Weather Anomaly Detection
 
-This repository contains our group project for COMP7707: a real-time IoT analytics pipeline built with Python.
+Real-time anomaly detection pipeline for simulated weather sensors. Kafka carries events from a Python producer, preprocessing + feature extraction build streaming mini-batches, and an Isolation Forest model flags suspicious readings that the Streamlit dashboard highlights.
 
-## Structure
-- `src/`: ingestion, preprocessing, feature extraction, anomaly detection
-- `notebooks/`: data exploration & experiments
-- `docs/`: architecture diagram, report assets
-- `config/`: example configuration files
-- `data/`: sample (non-sensitive) data
-- `tests/`: unit tests
+## Architecture Summary
+- **Sensors / Producer** – `src/ingest/kafka_producer_weather.py` simulates multiple sensors and writes JSON payloads to Kafka (`topic_raw`).
+- **Stream Processor** – `src/processing/pipeline_runner.py` consumes `topic_raw`, cleans the data, engineers rolling features, and runs the Isolation Forest model to produce anomaly labels. Detected anomalies can be re-published to `topic_processed`.
+- **Storage + Dashboard** – anomalies are stored (placeholder: PostgreSQL / CSV). `src/dashboard/dashboard_streamlit.py` visualises time series, anomalies, and sensor trends.
 
-## How to run (local simulation)
+Refer to `docs/ArchitectureDiagram.txt` and `docs/pipeline_overview.md` for more detail.
 
-1. Create a Python environment and install requirements:
+## Getting Started
+1. **Install dependencies**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. **Start Kafka locally**
+   ```bash
+   ./scripts/start_kafka_local.sh
+   ```
+   Create the `weather_raw` and `weather_processed` topics using the commands echoed by the script.
+3. **Generate sample data (optional)**
+   ```bash
+   python scripts/simulate_weather_data.py
+   ```
+4. **Run the streaming pipeline**
+   ```bash
+   ./scripts/run_local_pipeline.sh
+   ```
+   The script launches the Kafka producer in the background and runs the real-time pipeline runner.
+5. **Launch the dashboard**
+   ```bash
+   streamlit run src/dashboard/dashboard_streamlit.py
+   ```
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+## Folder Structure
 ```
-
-2. Run the pipeline (file-based simulation):
-
-```bash
-python -m src.run_pipeline --source file --max 50
+comp7707-iot-weather/
+├── src/
+│   ├── ingest/
+│   │   ├── kafka_producer_weather.py
+│   │   └── kafka_consumer_raw.py
+│   ├── processing/
+│   │   ├── preprocess.py
+│   │   ├── feature_extraction.py
+│   │   └── pipeline_runner.py
+│   ├── models/
+│   │   ├── anomaly_isolation_forest.py
+│   │   └── model_utils.py
+│   ├── dashboard/
+│   │   └── dashboard_streamlit.py
+│   └── utils/
+│       ├── config_loader.py
+│       └── logging_utils.py
+├── config/
+│   ├── config_example.yaml
+│   └── kafka_example.conf
+├── scripts/
+│   ├── start_kafka_local.sh
+│   ├── run_local_pipeline.sh
+│   └── simulate_weather_data.py
+├── notebooks/01_offline_exploration.ipynb
+├── docs/
+│   ├── ArchitectureDiagram.txt
+│   └── pipeline_overview.md
+├── data/sample_weather_data.csv
+├── tests/test_anomaly_isolation_forest.py
+├── requirements.txt
+└── README.md
 ```
-
-3. To run tests:
-
-```bash
-pytest -q
-```
-
-## Notes
-- `src/ingest.py` supports a Kafka consumer if you provide a running Kafka cluster and the `kafka-python` package.
-- The current anomaly detector is a simple z-score per sensor; improve later with feature rich models.
-# comp7707-iot-anomaly-project

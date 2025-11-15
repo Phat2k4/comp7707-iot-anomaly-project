@@ -1,0 +1,40 @@
+COMPONENTS
+---------
+- Simulated weather sensors producing temperature, humidity, pressure readings.
+- Kafka broker hosting topics: topic_raw and topic_processed.
+- Raw consumer pulling from Kafka and handing off to preprocessing.
+- Preprocessing stage normalising, cleaning, interpolating data.
+- Feature extraction stage computing rolling statistics and deltas.
+- Isolation Forest anomaly model.
+- Storage/PostgreSQL (placeholder) for persisting anomalies.
+- Streamlit dashboard reading from storage/sample files and visualising anomalies.
+
+DATA FLOW
+---------
+1. Weather sensors (or simulator) emit readings at configurable intervals.
+2. Kafka producer publishes JSON payloads to topic_raw.
+3. Kafka consumer validates required fields and forms a stream of dict records.
+4. Preprocessing normalises units, coerces out-of-range values, handles missing data.
+5. Feature extraction creates rolling window stats and rate-of-change features per sensor.
+6. Isolation Forest model scores batches, tagging anomalies.
+7. Anomalies are stored (PostgreSQL placeholder) and optionally re-published to topic_processed.
+8. Dashboard queries the stored anomalies/history to plot metrics and highlight events.
+
+ASCII DIAGRAM
+-------------
+Sensors/Simulator
+    |
+    v
+Kafka Broker (topic_raw)
+    |
+    v
+Raw Consumer -> Preprocess -> Feature Extraction
+                                      |
+                                      v
+                             Anomaly Model (Isolation Forest)
+                                      |
+                                      v
+                             Storage (PostgreSQL placeholder)
+                                      |
+                                      v
+                                 Dashboard (Streamlit)
