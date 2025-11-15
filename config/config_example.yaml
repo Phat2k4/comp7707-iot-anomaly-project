@@ -1,0 +1,7 @@
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topic: "iot-sensor-stream"
+
+pipeline:
+  window_size: 30
+  anomaly_threshold: 3.0
